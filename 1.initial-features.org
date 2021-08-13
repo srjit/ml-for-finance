@@ -1,0 +1,66 @@
+#+title: Generating initial feature set
+
+* Features
+
+  1. Simple Moving Average
+     - Usual shift periods used are 14, 50 and 200
+  2. Relative Strength Index
+
+\begin{equation}
+     Relative Strength, RS = \frac{Average\ Gain\ Over\ n\ periods}{Average\ Loss\ Over\ n\ periods}
+\end{equation}
+\begin{equation}
+     RSI = 100 - \frac{100}{1 + RS}
+\end{equation}
+
+
+#+BEGIN_SRC ipython :session eval :no
+
+feature_names = ['5d_close_pct']  # a list of the feature names for later
+
+# Create moving averages and rsi for timeperiods of 14, 30, 50, and 200
+for n in [14, 30, 50, 200]:
+
+    # Create the moving average indicator and divide by Adj_Close
+    lng_df['ma' + str(n)] = talib.SMA(lng_df['Adj_Close'].values,
+                              timeperiod=n) / lng_df["Adj_Close"]
+    # Create the RSI indicator
+    lng_df['rsi' + str(n)] = talib.RSI(lng_df['Adj_Close'].values, timeperiod=n)
+    
+    # Add rsi and moving average to the feature name list
+    feature_names = feature_names + ['ma' + str(n), 'rsi' + str(n)]
+
+print(feature_names)
+
+
+
+# Drop all na values
+lng_df = lng_df.dropna()
+
+# Create features and targets
+# use feature_names for features; '5d_close_future_pct' for targets
+features = lng_df[feature_names]
+targets = lng_df["5d_close_future_pct"]
+
+# Create DataFrame from target column and feature columns
+feature_and_target_cols = ['5d_close_future_pct'] + feature_names
+feat_targ_df = lng_df[feature_and_target_cols]
+
+# Calculate correlation matrix
+corr = feat_targ_df.corr()
+print(corr)
+
+
+
+# Plot heatmap of correlation matrix
+sns.heatmap(corr, annot= True, annot_kws = {"size": 14})
+plt.yticks(rotation=0, size = 14); plt.xticks(rotation=90, size = 14)  # fix ticklabel directions and size
+plt.tight_layout()  # fits plot area to the plot, "tightly"
+plt.show()  # show the plot
+
+
+#+END_SRC
+
+
+
+[[file:corr.png]]
