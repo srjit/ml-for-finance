@@ -1,0 +1,45 @@
+#+title: Random Forest Model
+
+
+* Building an RF model
+
+#+BEGIN_SRC ipython :session
+
+from sklearn.model_selection import ParameterGrid
+
+# Create a dictionary of hyperparameters to search
+grid = {'n_estimators':[200], 'max_depth': [3], 'max_features': [4, 8], 'random_state': [42]}
+test_scores = []
+
+# Loop through the parameter grid, set the hyperparameters, and save the scores
+for g in ParameterGrid(grid):
+    rfr.set_params(**g)  # ** is "unpacking" the dictionary
+    rfr.fit(train_features, train_targets)
+    test_scores.append(rfr.score(test_features, test_targets))
+
+# Find best hyperparameters from the test score and print
+best_idx = np.argmax(test_scores)
+print(test_scores[best_idx], ParameterGrid(grid)[best_idx])
+
+#+END_SRC
+
+* Using best hyperparameters to build the RF model
+
+#+BEGIN_SRC ipython :session
+# Use the best hyperparameters from before to fit a random forest model
+rfr = RandomForestRegressor(n_estimators=200, max_depth=3, max_features=4, random_state=42)
+rfr.fit(train_features, train_targets)
+
+# Make predictions with our model
+train_predictions = rfr.predict(train_features)
+test_predictions = rfr.predict(test_features)
+
+# Create a scatter plot with train and test actual vs predictions
+plt.scatter(train_targets, train_predictions, label='train')
+plt.scatter(test_targets, test_predictions, label='test')
+plt.legend()
+plt.show()
+#+END_SRC
+
+
+[[file:rf.png]]

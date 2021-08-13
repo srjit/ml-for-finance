@@ -1,0 +1,80 @@
+% Created 2021-08-13 Fri 16:54
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Sreejith Sreekumar}
+\date{\today}
+\title{Random Forest Model}
+\hypersetup{
+ pdfauthor={Sreejith Sreekumar},
+ pdftitle={Random Forest Model},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 26.3 (Org mode 9.1.9)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+
+\section{Building an RF model}
+\label{sec:org5ae8580}
+
+\begin{verbatim}
+
+from sklearn.model_selection import ParameterGrid
+
+# Create a dictionary of hyperparameters to search
+grid = {'n_estimators':[200], 'max_depth': [3], 'max_features': [4, 8], 'random_state': [42]}
+test_scores = []
+
+# Loop through the parameter grid, set the hyperparameters, and save the scores
+for g in ParameterGrid(grid):
+    rfr.set_params(**g)  # ** is "unpacking" the dictionary
+    rfr.fit(train_features, train_targets)
+    test_scores.append(rfr.score(test_features, test_targets))
+
+# Find best hyperparameters from the test score and print
+best_idx = np.argmax(test_scores)
+print(test_scores[best_idx], ParameterGrid(grid)[best_idx])
+
+\end{verbatim}
+
+\section{Using best hyperparameters to build the RF model}
+\label{sec:orgbdf1e67}
+
+\begin{verbatim}
+# Use the best hyperparameters from before to fit a random forest model
+rfr = RandomForestRegressor(n_estimators=200, max_depth=3, max_features=4, random_state=42)
+rfr.fit(train_features, train_targets)
+
+# Make predictions with our model
+train_predictions = rfr.predict(train_features)
+test_predictions = rfr.predict(test_features)
+
+# Create a scatter plot with train and test actual vs predictions
+plt.scatter(train_targets, train_predictions, label='train')
+plt.scatter(test_targets, test_predictions, label='test')
+plt.legend()
+plt.show()
+\end{verbatim}
+
+
+\begin{center}
+\includegraphics[width=.9\linewidth]{rf.png}
+\end{center}
+\end{document}
